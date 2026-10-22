@@ -84,6 +84,9 @@ async def test_canonical_compress_runs_the_live_agents_pre_compress_memory_hook(
     from gateway.session import SessionStore
     from agent.context_compressor import ContextCompressor
 
+    # profile_id='owned' is a relative profile home: the agent built here seeds SOUL.md
+    # under it, so keep it in tmp_path rather than the checkout.
+    monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(run, '_load_gateway_config', dict)
     store = SessionStore(tmp_path / 'sessions', GatewayConfig())
     db = store._db
@@ -136,6 +139,9 @@ async def test_input_is_admitted_while_compress_summarizes_but_not_claimed_until
     from gateway.session_contract import Submission
     from agent.context_compressor import ContextCompressor
 
+    # profile_id='owned' is a relative profile home: the agent built here seeds SOUL.md
+    # under it, so keep it in tmp_path rather than the checkout.
+    monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(run, '_load_gateway_config', dict)
     store = SessionStore(tmp_path / 'sessions', GatewayConfig())
     db = store._db
