@@ -7,8 +7,9 @@
 #
 #   scripts/ci/swap_blacksmith_runners.sh && git diff --stat .github
 #
-# Idempotent. tests.yml's slice count (8, not upstream's 2) is a separate
-# hand edit; keep it when resolving that file.
+# Idempotent. tests.yml's slice count (8, not upstream's 2) and the test
+# worker counts (4 in tests.yml and tests-os.yml's Windows lane) are separate
+# hand edits; keep them when resolving those files.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 find .github -type f \( -name '*.yml' -o -name '*.yaml' \) -print0 | xargs -0 perl -pi -e '

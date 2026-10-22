@@ -115,7 +115,9 @@ jobs:
           scripts/run_tests.sh
         env:
           HERMES_TEST_SLICE: ${{ matrix.slice }}/8
-          HERMES_TEST_WORKERS: 32
+          # Fork: 4 = the GitHub-hosted runner's core count. Upstream's 32 assumed
+          # 32-core boxes and oversubscribed these 8x, timing out daemon tests.
+          HERMES_TEST_WORKERS: 4
           HERMES_TEST_FILE_TIMEOUT: 600
           # Ensure tests don't accidentally call real APIs
           OPENROUTER_API_KEY: ""
