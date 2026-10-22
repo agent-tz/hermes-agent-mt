@@ -729,8 +729,7 @@ def build_session_key(
         # ("group:<id>"). Strip a redundant leading "<chat_type>:" so the key doesn't double up
         # ("signal:group:group:<id>") — the chat_type slot above already supplies it once.
         type_prefix = f"{source.chat_type}:"
-        if chat_id.startswith(type_prefix):
-            chat_id = chat_id[len(type_prefix):]
+        chat_id = chat_id.removeprefix(type_prefix)
     if chat_id:
         parts.append(chat_id)
     # DMs put the participant before the thread; groups/threads put it after.

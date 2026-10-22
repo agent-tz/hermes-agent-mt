@@ -45,7 +45,7 @@ def format_current_model_line(model: str, provider: str) -> str:
     return f"[Current model: {model}]"
 
 
-def append_current_model_line(injections: List[str], agent: Any) -> None:
+def append_current_model_line(injections: list[str], agent: Any) -> None:
     """Append the live-model line to ``injections``, read from ``agent``.
 
     Reads ``agent.model`` / ``agent.provider`` at call time so that when this

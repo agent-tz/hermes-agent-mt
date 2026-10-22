@@ -48,8 +48,8 @@ class PlatformIdentity:
     discriminator: Optional[str] = None
     in_guild: bool = False
     guild_id: Optional[str] = None
-    member_role_ids: FrozenSet[str] = frozenset()
-    guild_roles: Tuple[Tuple[str, str], ...] = ()  # (role id, role name)
+    member_role_ids: frozenset[str] = frozenset()
+    guild_roles: tuple[tuple[str, str], ...] = ()  # (role id, role name)
 
 
 # One log line per (entry, user) / (guild, role entry) so operators can verify
@@ -185,7 +185,7 @@ _BOT_ROLES_ENV = "DISCORD_ALLOWED_BOT_ROLES"
 _BOT_USERS_ENV = "DISCORD_ALLOWED_BOT_USERS"
 
 
-def _snowflakes_from_env(var: str) -> Tuple[bool, FrozenSet[str]]:
+def _snowflakes_from_env(var: str) -> tuple[bool, frozenset[str]]:
     """(configured, numeric ids) for a comma-separated id list in *var*.
 
     ``configured`` is True whenever the variable holds anything non-blank,
@@ -347,14 +347,14 @@ def policy_for_source(gateway_config: Any, source: Any) -> SlashAccessPolicy:
 
 __all__ = [
     "PlatformIdentity",
+    "SlashAccessPolicy",
     "admin_entries_match",
     "approver_role_matches",
     "approver_roles_match",
     "discord_bot_gate_decision",
-    "SlashAccessPolicy",
-    "policy_from_extra",
-    "policy_for_source",
     "policy_for_runner_source",
+    "policy_for_source",
+    "policy_from_extra",
 ]
 
 

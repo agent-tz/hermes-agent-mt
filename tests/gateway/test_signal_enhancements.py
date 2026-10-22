@@ -494,7 +494,6 @@ class TestProfileNameSetting:
         async def mock_rpc(method, params, rpc_id=None, **kwargs):
             if method == "updateProfile":
                 raise Exception("RPC timeout")
-            return None
 
         adapter._rpc = mock_rpc
 

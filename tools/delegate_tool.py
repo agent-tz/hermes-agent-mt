@@ -57,7 +57,7 @@ from tools.delegate_tool_results import (
     _apply_summary_budget, _build_child_preserving_parent_tools, _run_child_lifecycle, _summarize_tool_arguments,
 )
 # Fork #123: timed-out subagent partial-summary salvage (lives with the other result helpers).
-from tools.delegate_tool_results import (  # noqa: F401 — re-exported for callers/tests
+from tools.delegate_tool_results import (
     _EMPTY_RESPONSE_SENTINEL, _PARTIAL_SUMMARY_MAX_CHARS, _PARTIAL_SUMMARY_TURNS, _salvage_partial_summary,
 )
 

@@ -115,7 +115,7 @@ class GatewayStartupMixin:
         means the resume marker came from third-party activity recency.
         """
         try:
-            entry = self.session_store._entries.get(session_key)  # noqa: SLF001
+            entry = self.session_store._entries.get(session_key)
             if entry is None or not entry.session_id:
                 return True
             transcript = await asyncio.to_thread(self.session_store.load_transcript, entry.session_id)

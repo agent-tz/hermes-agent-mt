@@ -36,7 +36,7 @@ from tools.memory_tool import MemoryStore, ENTRY_DELIMITER
 @pytest.fixture
 def mem_dir(tmp_path, monkeypatch):
     """Patch get_memory_dir to a temp dir; return the dir."""
-    import tools.memory_tool  # noqa: F401 — ensure it is in sys.modules
+    import tools.memory_tool
     monkeypatch.setattr(sys.modules["tools.memory_tool"], "get_memory_dir", lambda: tmp_path)
     return tmp_path
 

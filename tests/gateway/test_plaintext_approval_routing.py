@@ -121,7 +121,7 @@ def test_plaintext_from_non_admin_does_not_resolve():
     resolve a dangerous-command approval — same rule as /approve itself.
     Without this, plaintext synonyms would be an admin-gate bypass."""
     _clear_approval_state()
-    runner, adapter = _make_runner()
+    runner, _adapter = _make_runner()
     runner._is_approval_admin = lambda _source: False
     session_key, entry = _register_blocking_approval(runner)
 

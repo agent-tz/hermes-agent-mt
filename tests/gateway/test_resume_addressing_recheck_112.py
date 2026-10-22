@@ -45,16 +45,16 @@ sys.modules.setdefault("telegram", _tg)
 sys.modules.setdefault("telegram.constants", _tg.constants)
 sys.modules.setdefault("telegram.ext", types.ModuleType("telegram.ext"))
 
-from gateway.config import Platform  # noqa: E402
-from gateway.platforms.base import (  # noqa: E402
+from gateway.config import Platform
+from gateway.platforms.base import (
     MessageEvent,
     MessageType,
     SessionSource,
     build_session_key,
 )
-from gateway.run import GatewayRunner, build_resume_recovery_note  # noqa: E402
-from gateway.session import SessionEntry  # noqa: E402
-from tests.gateway.restart_test_helpers import (  # noqa: E402
+from gateway.run import GatewayRunner, build_resume_recovery_note
+from gateway.session import SessionEntry
+from tests.gateway.restart_test_helpers import (
     make_restart_runner,
     make_restart_source,
 )

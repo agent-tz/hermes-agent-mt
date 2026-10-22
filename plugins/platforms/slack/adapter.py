@@ -74,6 +74,7 @@ _APPROVED_CHANNELS_FILE = "slack_approved_channels.json"
 
 # User-Agent prefix (``HermesAgent/<version>``) for platform-partner attribution of API calls.
 from hermes_cli.version_info import get_version_info
+from datetime import UTC
 
 _HERMES_SLACK_USER_AGENT_PREFIX = f"HermesAgent/{get_version_info().base_version}"
 
@@ -6621,7 +6622,7 @@ class SlackAdapter(BasePlatformAdapter):
             existing[channel_id] = {
                 "team_id": team_id or "",
                 "added_by": added_by or "",
-                "approved_at": datetime.now(timezone.utc).isoformat(),
+                "approved_at": datetime.now(UTC).isoformat(),
             }
             import tempfile
 

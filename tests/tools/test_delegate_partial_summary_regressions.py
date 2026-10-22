@@ -88,9 +88,7 @@ class TestPublishedTranscriptCannotGoStale:
                 targets = []
                 if isinstance(node, ast.Assign):
                     targets = node.targets
-                elif isinstance(node, (ast.AugAssign, ast.AnnAssign)):
-                    targets = [node.target]
-                elif isinstance(node, (ast.For, ast.NamedExpr)):
+                elif isinstance(node, (ast.AugAssign, ast.AnnAssign, ast.For, ast.NamedExpr)):
                     targets = [node.target]
                 for t in targets:
                     for sub in ast.walk(t):

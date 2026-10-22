@@ -1467,7 +1467,7 @@ def restore_primary_runtime(agent) -> bool:
                     _overrides.pop("extra_body", None)
                 else:
                     _overrides["extra_body"] = _saved_eb
-        except Exception:  # noqa: BLE001 — restore is best-effort, never fatal
+        except Exception:
             pass
 
         # Clear the scoping state so this runs exactly once.

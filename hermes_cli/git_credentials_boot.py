@@ -45,7 +45,7 @@ import re
 import sys
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from pathlib import Path
 from typing import Optional
 
@@ -254,7 +254,7 @@ def gh_hosts_needs_refresh(
 def _parse_iso_z(value: str) -> float:
     return (
         datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
-        .replace(tzinfo=timezone.utc)
+        .replace(tzinfo=UTC)
         .timestamp()
     )
 

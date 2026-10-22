@@ -47,7 +47,7 @@ def platform_httpx_limits() -> httpx.Limits | None:
     )
 
 
-def sse_httpx_limits() -> "httpx.Limits | None":
+def sse_httpx_limits() -> httpx.Limits | None:
     """Return ``httpx.Limits`` for a dedicated long-lived SSE stream client.
 
     An SSE stream is a single long-lived GET, not a pool of short calls.

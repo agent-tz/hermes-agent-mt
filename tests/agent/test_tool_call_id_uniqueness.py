@@ -139,7 +139,7 @@ def test_unrepaired_transcript_keeps_results_but_still_collides():
     sanitized = _sanitize(messages)
     count, chars = count_visible_tool_results(sanitized)
     assert (count, chars) == (INCIDENT_TOOL_RESULTS, INCIDENT_TOOL_CHARS)
-    total, distinct, would_drop = audit_tool_call_ids(sanitized)
+    _total, distinct, would_drop = audit_tool_call_ids(sanitized)
     assert distinct == INCIDENT_DISTINCT_IDS, (
         "without the repair the payload still reuses round-scoped ids"
     )

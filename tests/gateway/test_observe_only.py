@@ -170,16 +170,6 @@ class TestSignalObserveOnly:
         adapter.handle_message = AsyncMock(side_effect=lambda e: capture_handler(e))
 
         # Build a group message without mention
-        envelope = {
-            "source": "+15559999999",
-            "sourceName": "Alice",
-            "sourceUuid": "aaaa-bbbb",
-            "dataMessage": {
-                "message": "hello everyone",
-                "groupInfo": {"groupId": "testgroup123"},
-                "timestamp": 1700000000000,
-            },
-        }
 
         # Patch _process_envelope to just test the mention filter logic.
         # Instead, we test by calling the internal method if it exists,

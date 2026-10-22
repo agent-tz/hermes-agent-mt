@@ -227,7 +227,7 @@ class TestSignalConnectionRetry:
         """Multiple connection errors within window, final attempt succeeds."""
         import httpx
         _patch_conn_constants(monkeypatch)
-        sleep_calls, _ = _patch_tool_clock(monkeypatch)
+        _sleep_calls, _ = _patch_tool_clock(monkeypatch)
 
         # Two connection errors then success
         fake = _FakeSignalHttp([
@@ -274,7 +274,7 @@ class TestSignalConnectionRetry:
         """Daemon down for longer than window → batch failure, error in result."""
         import httpx
         _patch_conn_constants(monkeypatch)
-        sleep_calls, advance_clock = _patch_tool_clock(monkeypatch)
+        _sleep_calls, advance_clock = _patch_tool_clock(monkeypatch)
 
         # Provide many connection errors; advance clock past window on first sleep
         call_count = [0]
@@ -317,7 +317,7 @@ class TestSignalConnectionRetry:
         from plugins.platforms.signal.signal_rate_limit import SIGNAL_RPC_ERROR_RATELIMIT
 
         _patch_conn_constants(monkeypatch)
-        sleep_calls, _ = _patch_tool_clock(monkeypatch)
+        _sleep_calls, _ = _patch_tool_clock(monkeypatch)
 
         rate_limit_err = {
             "error": {

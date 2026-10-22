@@ -53,12 +53,11 @@ def _import_fitz():
 def _resolve_local_path(path: str) -> str:
     """Strip a ``file://`` scheme and expand ``~`` so paths resolve locally."""
     resolved = path.strip()
-    if resolved.startswith("file://"):
-        resolved = resolved[len("file://"):]
+    resolved = resolved.removeprefix("file://")
     return os.path.expanduser(resolved)
 
 
-def _parse_pages(spec: Optional[str], page_count: int) -> List[int]:
+def _parse_pages(spec: Optional[str], page_count: int) -> list[int]:
     """Parse a 1-indexed page spec into sorted 0-indexed page numbers.
 
     ``"1"`` -> [0]; ``"1-3"`` -> [0,1,2]; ``"1,3,5"`` -> [0,2,4];
@@ -111,7 +110,7 @@ def _read_document_sync(path: str, pages: Optional[str]) -> str:
     try:
         page_count = doc.page_count
         selected = _parse_pages(pages, page_count)
-        chunks: List[str] = []
+        chunks: list[str] = []
         for idx in selected:
             text = doc.load_page(idx).get_text().strip()
             if text:
@@ -192,7 +191,7 @@ READ_DOCUMENT_SCHEMA = {
 }
 
 
-async def _handle_read_document(args: Dict[str, Any], **kw: Any) -> str:
+async def _handle_read_document(args: dict[str, Any], **kw: Any) -> str:
     path = args.get("path") or args.get("document_url") or ""
     pages = args.get("pages")
     return await read_document_tool(path, pages)

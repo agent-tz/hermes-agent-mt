@@ -102,10 +102,8 @@ class TestSyncMessageGroupCreation:
             allowed_users="*",
         )
 
-        processed_messages = []
 
         # Save original _handle_envelope to check dataMessage promotion
-        original_handle = adapter._handle_envelope
 
         async def mock_rpc(method, params, rpc_id=None, **kwargs):
             return {"success": True}

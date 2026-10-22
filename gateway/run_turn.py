@@ -743,7 +743,7 @@ class GatewayTurnMixin(GatewayTurnPrepareMixin, GatewayTurnHygieneMixin, Gateway
     # Ported from the fork's gateway/run.py into upstream's run_turn mixin (v0.22.4 split).
     # ------------------------------------------------------------------
 
-    def _get_letta_brain(self) -> Optional[Dict[str, str]]:
+    def _get_letta_brain(self) -> Optional[dict[str, str]]:
         """Return {"base_url", "agent_id", "api_key"} if Letta-brain mode is
         configured (api_key may be "" for unsecured self-hosted servers).
 
@@ -771,7 +771,7 @@ class GatewayTurnMixin(GatewayTurnPrepareMixin, GatewayTurnHygieneMixin, Gateway
                 }
         return None
 
-    def _letta_agent_lock(self, agent_key: str) -> "asyncio.Lock":
+    def _letta_agent_lock(self, agent_key: str) -> asyncio.Lock:
         """Per-Letta-agent serialization lock (spec B3).
 
         Letta processes an agent's messages sequentially — concurrent group
@@ -915,7 +915,7 @@ class GatewayTurnMixin(GatewayTurnPrepareMixin, GatewayTurnHygieneMixin, Gateway
                     _stream_consumer.finish()
                     try:
                         await asyncio.wait_for(stream_task, timeout=5.0)
-                    except (asyncio.TimeoutError, asyncio.CancelledError):
+                    except (TimeoutError, asyncio.CancelledError):
                         stream_task.cancel()
 
             if reply is None:

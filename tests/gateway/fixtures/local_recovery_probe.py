@@ -26,6 +26,9 @@ class Model(BaseHTTPRequestHandler):
         if body.get('messages'):
             self.server.requests.append(body)
         text = next((m.get('content', '') for m in reversed(body.get('messages', [])) if m['role'] == 'user'), '')
+        # Fork (#67): the wire copy of the current user turn ends with a
+        # "[Current model: X via Y]" line; match on the user's own text.
+        text = text.split('\n\n[Current model:', 1)[0] if isinstance(text, str) else text
         if text == 'BLOCK_STARTED':
             self.server.blocked.set()
             self.server.release.wait(60)
