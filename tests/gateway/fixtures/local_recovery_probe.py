@@ -50,7 +50,7 @@ class Model(BaseHTTPRequestHandler):
 CHILD_ENV_KEYS = ('PATH', 'LANG', 'TZ', 'SYSTEMROOT', 'SYSTEMDRIVE', 'WINDIR', 'COMSPEC', 'TEMP', 'TMP', 'PATHEXT',
                   'LOCALAPPDATA', 'APPDATA', 'PROGRAMDATA', 'NUMBER_OF_PROCESSORS', 'PROCESSOR_ARCHITECTURE',
                   # Fork #67: carry the suite's "live-model line off" into child gateways.
-                  'HERMES_MODEL_AWARENESS')
+                  'HERMES_MODEL_AWARENESS', 'GATEWAY_THROTTLE_ENABLED')
 
 
 def child_env():

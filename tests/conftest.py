@@ -33,6 +33,9 @@ import pytest
 # Fork #67: the live-model line is off for the whole suite, set at import time so
 # session/module-scoped fixtures that spawn child gateways (child_env()) inherit it.
 os.environ["HERMES_MODEL_AWARENESS"] = "0"
+# Fork R6: the inbound throttle is off in the suite for the same reason; spawned gateways
+# hammer handle_message far faster than its per-user window allows.
+os.environ["GATEWAY_THROTTLE_ENABLED"] = "false"
 
 # Ensure project root is importable
 PROJECT_ROOT = Path(__file__).parent.parent

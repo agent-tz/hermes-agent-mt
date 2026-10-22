@@ -14,7 +14,7 @@ def test_headless_first_run_exits_with_setup_guidance_before_gateway(tmp_path, a
     user = tmp_path / "user"
     user.mkdir()
     root = Path(__file__).resolve().parents[2]
-    env = {k: os.environ[k] for k in ("PATH", "LANG", "TZ", "HERMES_MODEL_AWARENESS") if k in os.environ}
+    env = {k: os.environ[k] for k in ("PATH", "LANG", "TZ", "HERMES_MODEL_AWARENESS", "GATEWAY_THROTTLE_ENABLED") if k in os.environ}
     env.update(HOME=str(user), USERPROFILE=str(user), HERMES_HOME=str(home),
                PYTHONPATH=str(root), PYTHONUNBUFFERED="1")
     result = subprocess.run(
