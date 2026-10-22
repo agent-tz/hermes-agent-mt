@@ -60,22 +60,6 @@ def format_current_model_line(model: str, provider: str) -> str:
     return f"[Current model: {model}]"
 
 
-def append_current_model_line(injections: list[str], agent: Any) -> None:
-    """Append the live-model line to ``injections``, read from ``agent``.
-
-    Reads ``agent.model`` / ``agent.provider`` at call time so that when this
-    runs after ``try_activate_fallback`` has mutated those fields it reflects
-    the fallback backend, not the configured primary. No-op when the model is
-    unknown.
-    """
-    line = format_current_model_line(
-        getattr(agent, "model", "") or "",
-        getattr(agent, "provider", "") or "",
-    )
-    if line:
-        injections.append(line)
-
-
 def with_current_model_line(content: Any, agent: Any) -> Any:
     """Return ``content`` ending in exactly one current-model line.
 
