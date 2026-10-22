@@ -188,7 +188,7 @@ class InboundThrottle:
         if not path.exists():
             # First run: no ledger yet is not an error — start a fresh day.
             return {"day": _utc_day(), "turns": 0, "spend_usd": 0.0}
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
         if not isinstance(data, dict):
             raise ValueError("ledger is not a JSON object")
         day = data.get("day")

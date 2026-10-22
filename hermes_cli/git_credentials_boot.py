@@ -271,7 +271,7 @@ def _read_env_token(env_path: Path) -> Optional[tuple[str, str]]:
     match across ``TOKEN_VARS`` (in precedence order) wins.
     """
     try:
-        content = env_path.read_text(encoding="utf-8")
+        content = env_path.read_text(encoding="utf-8-sig")
     except (OSError, UnicodeDecodeError):
         return None
     for key in TOKEN_VARS:
@@ -483,7 +483,7 @@ def _provision_app_mode(
 
 def _read_text(path: Path) -> Optional[str]:
     try:
-        return path.read_text(encoding="utf-8")
+        return path.read_text(encoding="utf-8-sig")
     except (OSError, UnicodeDecodeError):
         return None
 

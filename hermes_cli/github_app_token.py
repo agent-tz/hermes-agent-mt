@@ -84,7 +84,7 @@ def read_app_credentials(env_path: Path) -> Optional[AppCredentials]:
     the static-PAT path — App auth is strictly opt-in per agent.
     """
     try:
-        content = env_path.read_text(encoding="utf-8")
+        content = env_path.read_text(encoding="utf-8-sig")
     except (OSError, UnicodeDecodeError):
         return None
     app_id = _read_env_var(content, _APP_ID_VAR)
@@ -184,7 +184,7 @@ def _expires_epoch(iso: str) -> float:
 def _load_cache_raw(path: Path) -> Optional[tuple[str, str]]:
     """``(token, expires_at_iso)`` from the cache, or ``None`` if absent/corrupt."""
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
         _expires_epoch(data["expires_at"])  # validate parseability
         return data["token"], data["expires_at"]
     except Exception:

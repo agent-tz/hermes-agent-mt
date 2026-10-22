@@ -34,7 +34,7 @@ class ResolvedDecision:
 
 def read_open_decisions(decisions_path: str) -> list[Decision]:
     try:
-        with open(decisions_path, "r", encoding="utf-8") as fh:
+        with open(decisions_path, "r", encoding="utf-8-sig") as fh:
             text = fh.read()
     except OSError:
         return []
@@ -77,7 +77,7 @@ def most_recent_resolved(path: str) -> Optional[ResolvedDecision]:
     chronologically, so last = newest).
     """
     try:
-        with open(path, "r", encoding="utf-8") as fh:
+        with open(path, "r", encoding="utf-8-sig") as fh:
             text = fh.read()
     except OSError:
         return None

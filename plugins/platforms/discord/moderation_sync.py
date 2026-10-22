@@ -131,7 +131,7 @@ class DenyStore:
         if not path.exists():
             return {}
         try:
-            data = json.loads(path.read_text(encoding="utf-8"))
+            data = json.loads(path.read_text(encoding="utf-8-sig"))
             if not isinstance(data, dict):
                 raise ValueError("deny store is not a JSON object")
             return data

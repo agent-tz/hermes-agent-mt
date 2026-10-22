@@ -69,7 +69,7 @@ def read_entries(path: Path) -> list[str]:
     if not path.exists():
         return []
     try:
-        raw = path.read_text(encoding="utf-8")
+        raw = path.read_text(encoding="utf-8-sig")
     except OSError:
         return []
     if not raw.strip():

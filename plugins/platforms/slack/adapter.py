@@ -6575,7 +6575,7 @@ class SlackAdapter(BasePlatformAdapter):
             path = get_hermes_home() / _APPROVED_CHANNELS_FILE
             if not path.exists():
                 return
-            data = json.loads(path.read_text())
+            data = json.loads(path.read_text(encoding="utf-8-sig"))
             if isinstance(data, dict):
                 loaded = {str(k) for k in data.keys() if str(k).strip()}
                 if loaded:
@@ -6614,7 +6614,7 @@ class SlackAdapter(BasePlatformAdapter):
             existing: dict = {}
             if path.exists():
                 try:
-                    existing = json.loads(path.read_text())
+                    existing = json.loads(path.read_text(encoding="utf-8-sig"))
                     if not isinstance(existing, dict):
                         existing = {}
                 except Exception:
@@ -6633,7 +6633,7 @@ class SlackAdapter(BasePlatformAdapter):
                 suffix=".tmp",
             )
             try:
-                with os.fdopen(fd, "w") as fh:
+                with os.fdopen(fd, "w", encoding="utf-8") as fh:
                     json.dump(existing, fh, indent=2)
                 os.replace(tmp, str(path))
             except Exception:
