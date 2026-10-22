@@ -98,10 +98,10 @@ def _patch_tool_clock(monkeypatch):
     def advance_clock(delta: float):
         offset[0] += delta
 
-    monkeypatch.setattr("tools.send_message_tool.asyncio.sleep", fake_sleep)
-    monkeypatch.setattr("tools.send_message_tool.time.monotonic", lambda: offset[0])
+    monkeypatch.setattr("plugins.platforms.signal.standalone.asyncio.sleep", fake_sleep)
+    monkeypatch.setattr("plugins.platforms.signal.standalone.time.monotonic", lambda: offset[0])
     # Also patch scheduler module's clock so acquire() is consistent
-    monkeypatch.setattr("gateway.platforms.signal_rate_limit.time.monotonic", lambda: offset[0])
+    monkeypatch.setattr("plugins.platforms.signal.signal_rate_limit.time.monotonic", lambda: offset[0])
 
     return sleep_calls, advance_clock
 
@@ -112,7 +112,7 @@ def _patch_tool_clock(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def _reset_signal_scheduler():
-    from gateway.platforms.signal_rate_limit import _reset_scheduler
+    from plugins.platforms.signal.signal_rate_limit import _reset_scheduler
     _reset_scheduler()
     yield
     _reset_scheduler()
@@ -129,11 +129,11 @@ TINY_CAP = 0.05     # seconds
 def _patch_conn_constants(monkeypatch):
     """Monkeypatch the connection-retry constants to tiny values."""
     monkeypatch.setattr(
-        "gateway.platforms.signal_rate_limit.SIGNAL_CONNECT_RETRY_WINDOW",
+        "plugins.platforms.signal.signal_rate_limit.SIGNAL_CONNECT_RETRY_WINDOW",
         TINY_WINDOW,
     )
     monkeypatch.setattr(
-        "gateway.platforms.signal_rate_limit.SIGNAL_CONNECT_RETRY_BACKOFF_CAP",
+        "plugins.platforms.signal.signal_rate_limit.SIGNAL_CONNECT_RETRY_BACKOFF_CAP",
         TINY_CAP,
     )
 
@@ -147,7 +147,7 @@ class TestIsConnectionError:
 
     @pytest.fixture(autouse=True)
     def _import(self):
-        from gateway.platforms.signal_rate_limit import _is_connection_error
+        from plugins.platforms.signal.signal_rate_limit import _is_connection_error
         self._is_connection_error = _is_connection_error
 
     def test_httpx_connect_error_is_connection_error(self):
@@ -314,7 +314,7 @@ class TestSignalConnectionRetry:
         success (attempt 2) — both 429-budget attempts still available.
         """
         import httpx
-        from gateway.platforms.signal_rate_limit import SIGNAL_RPC_ERROR_RATELIMIT
+        from plugins.platforms.signal.signal_rate_limit import SIGNAL_RPC_ERROR_RATELIMIT
 
         _patch_conn_constants(monkeypatch)
         sleep_calls, _ = _patch_tool_clock(monkeypatch)
@@ -403,7 +403,7 @@ class TestSignalConnectionRetry:
 # ---------------------------------------------------------------------------
 
 def _send_signal_fn():
-    from tools.send_message_tool import _send_signal
+    from plugins.platforms.signal.standalone import _send_signal
     return _send_signal
 
 

@@ -44,7 +44,7 @@ def _make_signal_adapter(monkeypatch, account="+15551234567", **extra):
     monkeypatch.setenv("SIGNAL_GROUP_ALLOWED_USERS", extra.pop("group_allowed", ""))
     if "allowed_users" in extra:
         monkeypatch.setenv("SIGNAL_ALLOWED_USERS", extra.pop("allowed_users"))
-    from gateway.platforms.signal import SignalAdapter
+    from plugins.platforms.signal.adapter import SignalAdapter
     config = PlatformConfig()
     config.enabled = True
     config.extra = {
@@ -59,7 +59,7 @@ def _make_signal_adapter(monkeypatch, account="+15551234567", **extra):
 @pytest.fixture(autouse=True)
 def _reset_signal_scheduler():
     try:
-        from gateway.platforms.signal_rate_limit import _reset_scheduler
+        from plugins.platforms.signal.signal_rate_limit import _reset_scheduler
         _reset_scheduler()
         yield
         _reset_scheduler()

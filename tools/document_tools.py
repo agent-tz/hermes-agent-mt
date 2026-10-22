@@ -7,8 +7,9 @@ hand-rolling ``python3 -c`` / ``pip install pymupdf`` in code-exec — the
 2026-06-04-opinionated-hsm-base-package.
 
 pymupdf (``fitz``) ships eagerly in the image (Dockerfile ``--extra
-documents``) and is also registered as a lazy feature (``documents.pymupdf``)
-so older images self-heal on first use.
+documents``). Outside the image it is the ``documents`` pyproject extra,
+installable on demand through ``pm`` when lazy installs are allowed
+(``tools.lazy_deps`` was retired upstream in favour of ``pm``).
 """
 
 from __future__ import annotations
@@ -30,17 +31,21 @@ _MAX_TEXT_CHARS = 200_000
 
 
 def _import_fitz():
-    """Return the ``fitz`` (pymupdf) module, lazy-installing if needed.
+    """Return the ``fitz`` (pymupdf) module, installing the extra if allowed.
 
-    Raises the original ImportError / FeatureUnavailable if it can't be made
-    importable so the caller can surface an actionable message.
+    Raises ImportError / pm.InstallError if it can't be made importable so
+    the caller can surface an actionable message.
     """
     try:
         import fitz  # type: ignore
         return fitz
     except ImportError:
-        from tools.lazy_deps import ensure  # local import: avoid hard dep at module load
-        ensure("documents.pymupdf", prompt=False)
+        # local import: pm is not needed when the extra is baked in
+        from pm import ensure_import, install_hint, lazy_installs_allowed
+        if not lazy_installs_allowed():
+            raise ImportError(
+                f"pymupdf is not installed; run `{install_hint('documents')}`")
+        ensure_import("documents")
         import fitz  # type: ignore
         return fitz
 
@@ -143,15 +148,16 @@ async def read_document_tool(path: str, pages: Optional[str] = None) -> str:
 
 
 def check_document_requirements() -> bool:
-    """True when pymupdf is importable now, or lazy-installable on first use."""
+    """True when pymupdf is importable now, or installable on first use."""
+    import importlib.util
     try:
-        import fitz  # noqa: F401
-        return True
-    except ImportError:
+        if importlib.util.find_spec("fitz") is not None:
+            return True
+    except (ImportError, ValueError):
         pass
     try:
-        from tools.lazy_deps import LAZY_DEPS, _allow_lazy_installs
-        return "documents.pymupdf" in LAZY_DEPS and _allow_lazy_installs()
+        from pm import lazy_installs_allowed
+        return bool(lazy_installs_allowed())
     except Exception:
         return False
 

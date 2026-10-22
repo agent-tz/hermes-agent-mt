@@ -305,7 +305,7 @@ class TestTerminalResumeInterrupt:
         runner.adapters[event.source.platform] = adapter
         runner._startup_resume_sessions = {sk}
 
-        with patch("gateway.run.merge_pending_message_event"):
+        with patch("gateway.platforms.base.merge_pending_message_event"):
             handled = await runner._handle_active_session_busy_message(event, sk)
 
         assert handled is True
@@ -326,7 +326,7 @@ class TestTerminalResumeInterrupt:
         runner.adapters[event.source.platform] = adapter
         runner._startup_resume_sessions = {sk}
 
-        with patch("gateway.run.merge_pending_message_event"):
+        with patch("gateway.platforms.base.merge_pending_message_event"):
             handled = await runner._handle_active_session_busy_message(event, sk)
 
         assert handled is True
@@ -347,7 +347,7 @@ class TestTerminalResumeInterrupt:
         runner.adapters[event.source.platform] = adapter
         runner._startup_resume_sessions = {sk}
 
-        with patch("gateway.run.merge_pending_message_event"):
+        with patch("gateway.platforms.base.merge_pending_message_event"):
             handled = await runner._handle_active_session_busy_message(event, sk)
 
         assert handled is True
@@ -384,7 +384,7 @@ class TestTerminalResumeInterrupt:
         runner._running_agents[sk] = parent
         runner.adapters[event.source.platform] = adapter
 
-        with patch("gateway.run.merge_pending_message_event"):
+        with patch("gateway.platforms.base.merge_pending_message_event"):
             handled = await runner._handle_active_session_busy_message(event, sk)
 
         assert handled is True

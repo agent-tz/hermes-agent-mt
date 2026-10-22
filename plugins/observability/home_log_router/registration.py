@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 # prefix-matching the module would spam the home channel with that lifecycle
 # noise (violates the no-lifecycle-spam rule).
 DEFAULT_LOGGERS: Tuple[str, ...] = (
-    "gateway.platforms.signal",
+    "plugins.platforms.signal",  # Signal adapter (moved from gateway.platforms.signal upstream)
     "agent.conversation_loop",
     "agent.degradation",
     "model_tools",

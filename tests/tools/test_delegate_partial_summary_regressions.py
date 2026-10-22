@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import ast
 import inspect
+import textwrap
 
 import pytest
 
@@ -68,49 +69,46 @@ class TestPublishedTranscriptCannotGoStale:
         structurally cannot match the tuple-unpacking form
         `messages, active_system_prompt = agent._compress_context(...)` — that
         is exactly how all four missed sites were written.
+
+        After the upstream loop decomposition the turn body lives in
+        ``_run_conversation_turn`` and phase helpers return a new ``messages``
+        through their verdict, which ``_run_phase`` copies onto the loop state.
+        So: no bare ``messages`` rebind may appear in the turn body, and
+        ``_run_phase`` (the single choke point for verdict rebinds) must
+        re-publish.
         """
         from agent import conversation_loop
 
-        src = inspect.getsource(conversation_loop)
-        tree = ast.parse(src)
-        fn = next(
-            n for n in ast.walk(tree)
-            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-            and n.name == "run_conversation"
-        )
+        for fn_name in ("run_conversation", "_run_conversation_turn"):
+            src = inspect.getsource(getattr(conversation_loop, fn_name))
+            tree = ast.parse(textwrap.dedent(src))
+            lines = textwrap.dedent(src).splitlines()
+            unaccounted = []
+            for node in ast.walk(tree):
+                targets = []
+                if isinstance(node, ast.Assign):
+                    targets = node.targets
+                elif isinstance(node, (ast.AugAssign, ast.AnnAssign)):
+                    targets = [node.target]
+                elif isinstance(node, (ast.For, ast.NamedExpr)):
+                    targets = [node.target]
+                for t in targets:
+                    for sub in ast.walk(t):
+                        if isinstance(sub, ast.Name) and sub.id == "messages":
+                            stmt = lines[node.lineno - 1]
+                            window = "\n".join(lines[node.lineno - 1:node.lineno + 40])
+                            if "_session_messages = " in window or "_compress_context" in stmt:
+                                continue
+                            unaccounted.append((fn_name, node.lineno, stmt.strip()))
+            assert not unaccounted, (
+                "these rebinds of `messages` leave agent._session_messages "
+                "pointing at an abandoned list, so the delegation timeout salvage "
+                f"would report stale work: {unaccounted}"
+            )
 
-        lines = src.splitlines()
-        unaccounted = []
-        for node in ast.walk(fn):
-            targets = []
-            if isinstance(node, ast.Assign):
-                targets = node.targets
-            elif isinstance(node, (ast.AugAssign, ast.AnnAssign)):
-                targets = [node.target]
-            elif isinstance(node, (ast.For, ast.NamedExpr)):
-                targets = [node.target]
-            for t in targets:
-                for sub in ast.walk(t):
-                    if isinstance(sub, ast.Name) and sub.id == "messages":
-                        stmt = lines[node.lineno - 1]
-                        # Window to the next 40 lines: a fixed-size window is
-                        # brittle (an added comment block silently changes the
-                        # verdict), so make it generously larger than any
-                        # comment while still local to the rebind.
-                        window = "\n".join(lines[node.lineno - 1:node.lineno + 40])
-                        # Accounted for if it re-publishes locally, OR the RHS
-                        # is _compress_context (which re-publishes internally).
-                        if (
-                            "agent._session_messages = messages" in window
-                            or "_compress_context" in stmt
-                        ):
-                            continue
-                        unaccounted.append((node.lineno, stmt.strip()))
-
-        assert not unaccounted, (
-            "these rebinds of `messages` leave agent._session_messages "
-            "pointing at an abandoned list, so the delegation timeout salvage "
-            f"would report stale work: {unaccounted}"
+        phase_src = inspect.getsource(conversation_loop._run_phase)
+        assert "agent._session_messages = value" in phase_src, (
+            "_run_phase must re-publish a verdict's new `messages` list"
         )
 
 
@@ -239,7 +237,15 @@ class TestCompressRepublishAtRuntime:
         class Fake:
             _session_messages = pre
 
+            def _conversation_root_id(self):
+                return None
+
         agent = Fake()
+        # Direct (non-watchdog) compression path: no progress-timeout worker thread.
+        monkeypatch.setattr(
+            "agent.conversation_compression.resolve_context_compression_timeouts",
+            lambda: (0, 0),
+        )
 
         compressed = [{"role": "assistant", "content": "compacted history"}]
 
