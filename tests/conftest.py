@@ -30,6 +30,10 @@ from pathlib import Path
 
 import pytest
 
+# Fork #67: the live-model line is off for the whole suite, set at import time so
+# session/module-scoped fixtures that spawn child gateways (child_env()) inherit it.
+os.environ["HERMES_MODEL_AWARENESS"] = "0"
+
 # Ensure project root is importable
 PROJECT_ROOT = Path(__file__).parent.parent
 if str(PROJECT_ROOT) not in sys.path:
