@@ -56,4 +56,6 @@ def test_billing_fallback_warning_names_failing_profile_and_remedy(tmp_path, cap
     caplog.clear()
     with caplog.at_level(logging.INFO, logger="agent.chat_completion_helpers"):
         _log_fallback_activated(None, FailoverReason.server_error, "a", "p", "b", "q")
-    assert [r.levelno for r in caplog.records] == [logging.INFO]
+    # Fork #32/#65: every fallback activation is a WARNING on the agent.degradation
+    # channel so home_log_router forwards it to the home channel (upstream: INFO).
+    assert [r.levelno for r in caplog.records] == [logging.WARNING]

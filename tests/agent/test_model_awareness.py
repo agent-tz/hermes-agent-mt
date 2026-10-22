@@ -8,9 +8,12 @@ hallucinating. The line must reflect the LIVE runtime — i.e. after
 place it must show the FALLBACK model, not the configured primary.
 """
 
+import pytest
+
 from agent.model_awareness import (
     append_current_model_line,
     format_current_model_line,
+    with_current_model_line,
 )
 
 
@@ -69,3 +72,39 @@ def test_append_is_noop_when_model_unknown():
     injections: list[str] = ["existing"]
     append_current_model_line(injections, agent)
     assert injections == ["existing"]
+
+
+# ---------------------------------------------------------------------------
+# with_current_model_line: the stamped (sidecar) form, idempotent for replay
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def awareness_on(monkeypatch):
+    monkeypatch.setenv("HERMES_MODEL_AWARENESS", "1")
+
+
+def test_with_line_appends_once(awareness_on):
+    agent = _FakeAgent("glm-5.2", "zai")
+    once = with_current_model_line("hello", agent)
+    assert once == "hello\n\n[Current model: glm-5.2 via zai]"
+    # Re-deriving with the same model is byte-identical (cache-stable replay).
+    assert with_current_model_line(once, agent) == once
+
+
+def test_with_line_replaces_after_fallback(awareness_on):
+    agent = _FakeAgent("primary", "openrouter")
+    stamped = with_current_model_line("hi\n\nPLUGIN-CTX", agent)
+    agent.model, agent.provider = "fallback", "zai"
+    swapped = with_current_model_line(stamped, agent)
+    assert swapped == "hi\n\nPLUGIN-CTX\n\n[Current model: fallback via zai]"
+    assert swapped.count("[Current model:") == 1
+
+
+def test_with_line_disabled_or_non_string(monkeypatch):
+    agent = _FakeAgent("m", "p")
+    monkeypatch.setenv("HERMES_MODEL_AWARENESS", "0")
+    assert with_current_model_line("hello", agent) == "hello"
+    monkeypatch.setenv("HERMES_MODEL_AWARENESS", "1")
+    parts = [{"type": "text", "text": "x"}]
+    assert with_current_model_line(parts, agent) is parts
+    assert with_current_model_line("hello", _FakeAgent("", "p")) == "hello"

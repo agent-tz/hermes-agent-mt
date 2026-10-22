@@ -2940,6 +2940,15 @@ Smart mode is particularly useful for reducing approval fatigue — it lets the 
 Setting `approvals.mode: off` disables all safety checks for terminal commands. Only use this in trusted, sandboxed environments.
 :::
 
+### Admin-only approvals
+
+`approvals.admin_only` (default `true`) restricts who can answer a dangerous-command prompt in shared chats. Only allowlisted admin users can approve or deny (by button, reaction, or `/approve` / `/deny`), and anyone else's attempt is refused while the prompt stays open for an admin. Set it to `false` to let any participant who can talk to the bot answer:
+
+```yaml
+approvals:
+  admin_only: true
+```
+
 ### Denial circuit breaker
 
 `approvals.denial_breaker_threshold` (default `3`) guards against the agent retrying variations of a command the smart-approval reviewer keeps denying — each retry burns another guardian LLM call. After that many consecutive denials in a session, the deny message escalates to a hard-stop instruction telling the agent to stop, report the blocked operation, and ask you to run it manually or `/approve`. Any approval resets the count; set `0` to disable:

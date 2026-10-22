@@ -2936,7 +2936,7 @@ def _context_id_for_source(source) -> Optional[str]:
     memory). Delegates to the single-sourced ``derive_context_id`` so the
     gateway and ``agent_init`` compute identical ids.
     """
-    from tools.memory_tool import derive_context_id
+    from tools.memory_context import derive_context_id
 
     platform = getattr(source, "platform", None)
     platform_str = getattr(platform, "value", None) or (str(platform) if platform else None)

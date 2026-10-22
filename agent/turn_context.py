@@ -965,9 +965,16 @@ def _stamp_api_content_sidecar(
     live_content = _turn_user_msg.get("content")
     from agent.session_persistence import _persist_lock, durable_user_row_content
     # Match the row the flush wrote (persist override = clean transcript), not the live bytes.
+    _composed = compose_user_api_content(live_content or "", ext_prefetch_cache, plugin_user_context)
+    if isinstance(live_content, str):
+        # Fork (#67): the live-model line is part of the stamped bytes so the
+        # sidecar, the wire and the next turn's replay all agree.
+        from agent.model_awareness import with_current_model_line
+        _composed = with_current_model_line(_composed if _composed is not None else live_content, agent)
+        if _composed == live_content:
+            _composed = None
     durable_content, _api_content = durable_user_row_content(
-        agent, _turn_user_msg, live_content,
-        compose_user_api_content(live_content or "", ext_prefetch_cache, plugin_user_context),
+        agent, _turn_user_msg, live_content, _composed,
     )
     if _api_content is None or _api_content == durable_content:
         return
@@ -1320,16 +1327,18 @@ def build_api_messages(
                 )
                 if _composed is not None:
                     api_msg["content"] = _composed
-            # Model self-awareness (fork #67): surface the LIVE model so the LLM can
-            # answer "what model are you?" truthfully. Read here — per-API-call
-            # assembly, after any try_activate_fallback() mutation of
-            # agent.model/provider — so a degraded turn shows the fallback backend.
-            # Wire copy only: never stamped into the api_content sidecar.
-            from agent.model_awareness import append_current_model_line
-            _model_line: list[str] = []
-            append_current_model_line(_model_line, agent)
-            if _model_line and isinstance(api_msg.get("content"), str):
-                api_msg["content"] = api_msg["content"] + "\n\n" + _model_line[0]
+            # Model self-awareness (fork #67): the prologue stamped the live-model
+            # line into the sidecar. Re-derive it here, after any
+            # try_activate_fallback() mutation of agent.model/provider, so a
+            # degraded turn names the fallback backend. Unchanged model => the
+            # bytes are identical (idempotent); changed model => rewrite the wire
+            # copy and the live sidecar together so they never drift.
+            from agent.model_awareness import with_current_model_line
+            _with_line = with_current_model_line(api_msg.get("content"), agent)
+            if _with_line != api_msg.get("content"):
+                api_msg["content"] = _with_line
+                if isinstance(_api_content, str) and _api_content:
+                    msg["api_content"] = _with_line
         elif (
             isinstance(_api_content, str) and _api_content
             and msg.get("role") in ("user", "assistant")

@@ -286,7 +286,7 @@ class TestFindAllSkills:
         (apple-notes, imessage, findmy, apple-reminders) were probed on a
         Linux container. ``skill_matches_platform`` is unit-tested in
         isolation, but this asserts the *discovery integration* — that
-        ``_find_all_skills`` actually applies the predicate — so a future
+        ``find_all_skills`` actually applies the predicate — so a future
         refactor can't silently drop the filter and let macOS skills leak
         into the model's context on Linux.
         """
@@ -301,7 +301,7 @@ class TestFindAllSkills:
         with patch("agent.skill_utils.sys") as mock_sys:
             mock_sys.platform = "linux"
             with patch("tools.skills_tool.SKILLS_DIR", tmp_path):
-                skills = _find_all_skills()
+                skills = skills_tool_module.find_all_skills()
 
         names = {s["name"] for s in skills}
         assert "imessage" not in names  # macOS-only, excluded on Linux

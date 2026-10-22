@@ -34,7 +34,9 @@ ROOT = Path(__file__).resolve().parents[2]
 # hermetic test process still carries; POSIX only ever uses the first three.
 _CHILD_ENV_KEYS = ('PATH', 'LANG', 'TZ', 'SYSTEMROOT', 'SYSTEMDRIVE', 'WINDIR', 'COMSPEC', 'TEMP', 'TMP',
                    'PATHEXT', 'LOCALAPPDATA', 'APPDATA', 'PROGRAMDATA', 'NUMBER_OF_PROCESSORS',
-                   'PROCESSOR_ARCHITECTURE')
+                   'PROCESSOR_ARCHITECTURE',
+                   # Fork #67: carry the suite's "live-model line off" into child gateways.
+                   'HERMES_MODEL_AWARENESS')
 
 
 class Model(BaseHTTPRequestHandler):

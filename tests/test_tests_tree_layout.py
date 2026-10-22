@@ -34,6 +34,9 @@ _NON_MIRROR_DIRS = {
     "fakes", "fixtures", "install", "integration", "manual",
     "monitoring", "perf_guards", "scripts", "secret_sources",
     "security", "skills", "verify", "website", "computer_use", "hermes_state",
+    # Fork: tests for the repo-root hooks/ directory (HOOK.yaml + handler.py,
+    # not a Python package, so _source_dirs() does not list it).
+    "hooks",
 }
 
 # Root-level modules whose tests sit directly in tests/ (no package to mirror).

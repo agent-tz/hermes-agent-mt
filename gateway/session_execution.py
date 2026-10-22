@@ -30,6 +30,17 @@ if TYPE_CHECKING:  # string annotations only; never imported at runtime (cycle)
 logger = logging.getLogger("gateway.run")
 
 
+
+def _mt_context_id_for_source(source):
+    """Fork: per-channel memory scope for this source (see gateway.run._context_id_for_source).
+
+    Imported lazily so this module keeps no import-time dependency on gateway.run,
+    and called as a module function so runner stand-ins need not carry it."""
+    from gateway.run import _context_id_for_source
+
+    return _context_id_for_source(source)
+
+
 class GatewaySessionAgentMixin:
     # ── agent resolution (cache reuse vs fresh build) ───────────────────────────────────────
 
@@ -175,7 +186,7 @@ class GatewaySessionAgentMixin:
             chat_id=src.chat_id, chat_name=src.chat_name, chat_type=src.chat_type, thread_id=src.thread_id,
             gateway_session_key=ctx.session_key,
             # mt: per-channel memory scoping (same id agent_init derives; see _context_id_for_source).
-            context_id=runner._context_id_for_source(src),
+            context_id=_mt_context_id_for_source(src),
             session_db=getattr(runner._session_db, "_db", runner._session_db),
             # Reload from disk — do not reuse the startup snapshot.
             # See #60955.

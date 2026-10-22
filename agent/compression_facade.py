@@ -308,14 +308,6 @@ class CompressionFacadeMixin:
                     idle_timeout=idle_timeout, total_ceiling=total_ceiling, approx_tokens=approx_tokens,
                 )
             _mirror_result_onto_live_lists(self, result, messages, direct_path=direct_path)
-            # Fork #123: compression returns a NEW list and every caller rebinds its local
-            # `messages` to it. Re-publish here (the single choke point) so an external
-            # observer holding `_session_messages` — the delegation timeout salvage — never
-            # keeps the abandoned pre-compression list. After the marker mirror above, so
-            # the old list already carries every persisted stamp.
-            with contextlib.suppress(Exception):
-                if isinstance(result, tuple) and result and isinstance(result[0], list):
-                    self._session_messages = result[0]
             _rebind_caller_session_context(self)
             return result
         finally:

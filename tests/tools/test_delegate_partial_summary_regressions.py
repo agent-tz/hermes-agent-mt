@@ -50,17 +50,12 @@ def _child(messages):
 # --------------------------------------------------------------------------
 
 class TestPublishedTranscriptCannotGoStale:
-    def test_compress_context_republishes_session_messages(self):
-        """The choke-point fix — this is what makes the 4 missed sites safe."""
-        import run_agent
-
-        src = inspect.getsource(run_agent.AIAgent._compress_context)
-        assert "_session_messages" in src, (
-            "_compress_context must re-publish the new list. Every caller "
-            "rebinds its local `messages` to the returned list; without this, "
-            "an external holder of _session_messages keeps the abandoned "
-            "pre-compression list and the salvage silently reports stale work."
-        )
+    # test_compress_context_republishes_session_messages was removed in the
+    # v0.22.4 catch-up: upstream now owns `_session_messages` (it re-publishes it
+    # at every turn stage and deliberately lets durable-parent adoption leave it
+    # divergent, see tests/agent/test_compression_rotation_state.py), so
+    # _compress_context must not clobber it. The loop-level choke point below
+    # (_run_phase) still keeps the salvage on the live list.
 
     def test_every_messages_rebind_in_run_conversation_is_accounted_for(self):
         """AST scan, not regex.
@@ -218,52 +213,3 @@ class TestTallyIsHonest:
         assert len(trace) == 1
 
 
-class TestCompressRepublishAtRuntime:
-    """Prove the mechanism, not just its source text.
-
-    Simulates the exact B1 scenario: the salvage holds _session_messages, the
-    turn compresses (rebinding to a NEW list), the child then appends its real
-    finding to the new list, and only then times out.
-    """
-
-    def test_salvage_sees_post_compression_work(self, monkeypatch):
-        import run_agent
-        from tools.delegate_tool import _salvage_partial_summary
-
-        pre = [{"role": "assistant", "content": "early scratch reasoning"}]
-
-        class Fake:
-            _session_messages = pre
-
-            def _conversation_root_id(self):
-                return None
-
-        agent = Fake()
-        # Direct (non-watchdog) compression path: no progress-timeout worker thread.
-        monkeypatch.setattr(
-            "agent.conversation_compression.resolve_context_compression_timeouts",
-            lambda: (0, 0),
-        )
-
-        compressed = [{"role": "assistant", "content": "compacted history"}]
-
-        def fake_compress(_agent, _messages, _system, **kwargs):
-            return compressed, "sys"
-
-        monkeypatch.setattr(
-            "agent.conversation_compression.compress_context", fake_compress
-        )
-
-        new_messages, _sys = run_agent.AIAgent._compress_context(
-            agent, pre, "sys", task_id="t"
-        )
-        assert new_messages is compressed, "sanity: compression returned a new list"
-
-        # The child keeps working on the post-compression list.
-        new_messages.append({"role": "assistant", "content": "THE REAL FINDING"})
-
-        summary, _ = _salvage_partial_summary(agent, 0)
-        assert "THE REAL FINDING" in summary, (
-            "the salvage read the abandoned pre-compression list — this is B1"
-        )
-        assert "early scratch reasoning" not in summary

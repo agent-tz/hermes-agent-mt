@@ -416,6 +416,10 @@ def _hermetic_environment(tmp_path, tmp_path_factory, monkeypatch):
     # tests opt back in with monkeypatch.setenv("GATEWAY_THROTTLE_ENABLED",
     # "true") and a fresh InboundThrottle/reset singleton.
     monkeypatch.setenv("GATEWAY_THROTTLE_ENABLED", "false")
+    # Fork #67 live-model line: default-on in production, off in the hermetic
+    # suite so upstream's byte-exact wire/replay tests stay untouched. The
+    # model-awareness tests opt back in with HERMES_MODEL_AWARENESS=1.
+    monkeypatch.setenv("HERMES_MODEL_AWARENESS", "0")
 
     # 5. Reset plugin singleton so tests don't leak plugins from
     #    ~/.hermes/plugins/ (which, per step 3, is now empty — but the

@@ -111,7 +111,10 @@ async def test_signal_pacing_owner_scope_keeps_acquisition_and_upload(owners, tm
         if not suppressed(name):
             assert warnings[-1] == root / "profiles" / name
         assert uploads[-1][0] == root / "profiles" / name
-        assert uploads[-1][1]["attachments"] == [str(path)]
+        # Fork #18/#47: Signal attachments go inline as base64 data URIs (signal-cli
+        # runs in its own container and cannot read the agent's paths).
+        from plugins.platforms.signal.signal_rate_limit import signal_attachment_arg
+        assert uploads[-1][1]["attachments"] == [signal_attachment_arg(str(path))]
         assert get_hermes_home() == root
     assert scheduler.acquire.await_count == 3
     assert scheduler.report_rpc_duration.await_count == 3
