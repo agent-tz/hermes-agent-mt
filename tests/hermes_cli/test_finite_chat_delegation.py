@@ -120,7 +120,7 @@ def test_finite_chat_joins_parallel_children_before_final_response(tmp_path, mod
     # Retain native Windows location variables, but never inherited credentials
     # or another session's finite/approval/runtime markers.
     env = {key: os.environ[key] for key in (
-        "PATH", "SYSTEMROOT", "WINDIR", "COMSPEC", "TEMP", "TMP", "LOCALAPPDATA", "APPDATA",
+        "PATH", "SYSTEMROOT", "WINDIR", "COMSPEC", "TEMP", "TMP", "LOCALAPPDATA", "APPDATA", "HERMES_MODEL_AWARENESS"
     ) if key in os.environ}
     env.update(HOME=str(tmp_path), USERPROFILE=str(tmp_path), HERMES_HOME=str(home),
                HERMES_MANAGED_DIR=str(tmp_path / "managed"), TERMINAL_CWD=str(tmp_path),

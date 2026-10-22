@@ -119,7 +119,7 @@ class PtyHermes:
         self._lock = threading.Lock()
         (root / "tmp").mkdir(parents=True, exist_ok=True)
         (root / "work").mkdir(parents=True, exist_ok=True)
-        env = {k: os.environ[k] for k in ("PATH", "LANG", "LC_ALL") if k in os.environ}
+        env = {k: os.environ[k] for k in ("PATH", "LANG", "LC_ALL", "HERMES_MODEL_AWARENESS") if k in os.environ}
         env.update(
             HOME=str(self.home), HERMES_HOME=str(self.hermes_home), PYTHONPATH=str(REPO_ROOT),
             TMPDIR=str(root / "tmp"), TERM="xterm-256color", COLORTERM="truecolor",
