@@ -24,7 +24,7 @@ import json
 import pytest
 from unittest.mock import AsyncMock
 
-from gateway.platforms.signal import _APPROVED_GROUPS_FILE
+from plugins.platforms.signal.adapter import _APPROVED_GROUPS_FILE
 from tests.gateway.test_signal_group_persistence import (
     _make_signal_adapter,
     _send_invite_envelope,
@@ -41,7 +41,7 @@ BOT_UUID = "99999999-9999-9999-9999-999999999999"
 
 @pytest.fixture(autouse=True)
 def _reset_signal_scheduler():
-    from gateway.platforms.signal_rate_limit import _reset_scheduler
+    from plugins.platforms.signal.signal_rate_limit import _reset_scheduler
     _reset_scheduler()
     yield
     _reset_scheduler()
