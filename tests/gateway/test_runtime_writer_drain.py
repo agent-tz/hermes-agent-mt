@@ -62,19 +62,24 @@ if claimed:
         assert result.returncode == 0, result.stderr
         return result.stdout.strip()
 
+    cron_stop = None
     assert acquire_gateway_runtime_lock()
     try:
         if partial_start:
             with pytest.raises(RuntimeError, match='owned thread-start failure'):
                 asyncio.run(start())
         else:
-            asyncio.run(start())
+            # The fork's event-loop watchdog shares cron_stop as its shutdown signal; it is
+            # not a runtime writer, so stop it the way gateway shutdown does.
+            cron_stop = asyncio.run(start())[0]
         assert started.wait(5)
         assert contender() == 'CLAIMED False'
         release_gateway_runtime_lock()
         assert contender() == 'CLAIMED False', 'final cleanup unlocked while a runtime writer survived'
     finally:
         gate.set()
+        if cron_stop is not None:
+            cron_stop.set()
         for thread in threads:
             thread.join(5)
             assert not thread.is_alive()
