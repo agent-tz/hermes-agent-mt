@@ -3780,6 +3780,13 @@ class GatewayRunner(
         # it appears in — approval is a human decision.
         if _is_discord_bot_sender(source):
             return False
+        # A LOCAL session (CLI, TUI, desktop) is the operator at their own
+        # machine; messaging allowlists don't apply. Only a source the local
+        # authority itself vouches for counts, so a forged LOCAL source stays
+        # refused.
+        if source.platform == Platform.LOCAL:
+            from gateway.session_local import authorize_local_source
+            return authorize_local_source(self, source) is True
         from gateway.slash_access import policy_for_runner_source
         policy = policy_for_runner_source(self, source)
         identity = getattr(source, "platform_identity", None)

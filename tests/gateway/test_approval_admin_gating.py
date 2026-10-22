@@ -536,3 +536,28 @@ class TestIsUserAdmin:
         adapter = _make_adapter()
         assert adapter._is_user_admin("") is False
         assert adapter._is_user_admin(None) is False
+
+
+# ===========================================================================
+# LOCAL sessions (CLI / TUI / desktop): the operator approves their own prompts
+# ===========================================================================
+
+
+class TestLocalSourceApprovalAdmin:
+    def _local_source(self):
+        return SessionSource(platform=Platform.LOCAL, user_id="local-user", chat_id="local", chat_type="dm")
+
+    @pytest.mark.parametrize("verdict,expected", [(True, True), (False, False), (None, False)])
+    def test_local_source_follows_the_local_authority(self, verdict, expected):
+        runner = _make_runner()
+        with patch("gateway.session_local.authorize_local_source", return_value=verdict) as auth, \
+                patch("gateway.slash_access.policy_for_runner_source", return_value=_ADMIN_POLICY):
+            assert runner._is_approval_admin(self._local_source()) is expected
+        auth.assert_called_once()
+
+    def test_messaging_source_never_consults_the_local_authority(self):
+        runner = _make_runner()
+        with patch("gateway.session_local.authorize_local_source", return_value=True) as auth, \
+                patch("gateway.slash_access.policy_for_runner_source", return_value=_ADMIN_POLICY):
+            assert runner._is_approval_admin(_make_source("not-admin")) is False
+        auth.assert_not_called()
