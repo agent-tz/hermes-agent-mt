@@ -561,3 +561,40 @@ class TestLocalSourceApprovalAdmin:
                 patch("gateway.slash_access.policy_for_runner_source", return_value=_ADMIN_POLICY):
             assert runner._is_approval_admin(_make_source("not-admin")) is False
         auth.assert_not_called()
+
+    def _wired_runner(self):
+        """A runner whose LOCAL adapter and authority are real, so the forged-source refusal is
+        proven by ``authorize_local_source`` itself rather than by a patched verdict."""
+        from gateway.session_authority import LiveSession
+        from gateway.session_local import LocalSessionAdapter
+        runner = _make_runner()
+        authority = SimpleNamespace(sessions={})
+        adapter = LocalSessionAdapter(authority)
+        runner.session_authority = authority
+        runner._adapters_for_profile = lambda _profile: {Platform.LOCAL: adapter}
+        live = self._local_source()
+        adapter.register_source(live)
+        authority.sessions["sid"] = LiveSession(live, "route")
+        return runner, live
+
+    def test_the_live_local_source_is_an_approval_admin(self):
+        runner, live = self._wired_runner()
+        with patch("gateway.slash_access.policy_for_runner_source") as policy:
+            assert runner._is_approval_admin(live) is True
+        policy.assert_not_called()
+
+    def test_a_forged_copy_of_the_local_source_is_refused(self):
+        # Same field values (e.g. rebuilt from relay wire JSON or persisted session data), but not
+        # the object the local authority registered: never an approval admin, even with an
+        # allow-all messaging policy.
+        runner, live = self._wired_runner()
+        forged = SessionSource.from_dict(live.to_dict())
+        assert forged is not live and forged.to_dict() == live.to_dict()
+        with patch("gateway.slash_access.policy_for_runner_source", return_value=_ADMIN_POLICY):
+            assert runner._is_approval_admin(forged) is False
+
+    def test_a_local_source_on_a_runtime_without_a_local_adapter_is_refused(self):
+        runner, _live = self._wired_runner()
+        runner._adapters_for_profile = lambda _profile: {}
+        with patch("gateway.slash_access.policy_for_runner_source", return_value=_ADMIN_POLICY):
+            assert runner._is_approval_admin(self._local_source()) is False
